@@ -12,11 +12,11 @@ template $ExchangeWindow: Adw.ApplicationWindow {
     Adw.HeaderBar {
       title-widget: Adw.ToggleGroup {
         Adw.Toggle {
-          label: _("XML -> Blueprint");
+          label: _("XML → Blueprint");
         }
 
         Adw.Toggle {
-          label: _("Blueprint -> XML");
+          label: _("Blueprint → XML");
         }
       };
 
@@ -45,51 +45,111 @@ template $ExchangeWindow: Adw.ApplicationWindow {
       margin-end: 12;
       spacing: 12;
 
-      ScrolledWindow {
-        vexpand: true;
-        hexpand: true;
+      Box {
+        orientation: vertical;
+        spacing: 6;
 
-        GtkSource.View {
-          top-margin: 12;
-          bottom-margin: 12;
-          left-margin: 12;
-          right-margin: 12;
+        Box {
+          spacing: 6;
+          margin-start: 6;
+          margin-end: 6;
 
-          buffer: GtkSource.Buffer input_buffer {
-            highlight-syntax: true;
-          };
+          Label {
+            label: _("Input");
 
-          show-line-numbers: true;
-          auto-indent: true;
-          monospace: true;
+            styles [
+              "heading",
+            ]
+          }
 
-          styles [
-            "card",
-          ]
+          Button {
+            icon-name: "edit-paste-symbolic";
+            tooltip-text: _("Paste");
+            halign: end;
+            hexpand: true;
+
+            styles [
+              "flat",
+            ]
+          }
+        }
+
+        ScrolledWindow {
+          vexpand: true;
+          hexpand: true;
+
+          GtkSource.View {
+            top-margin: 12;
+            bottom-margin: 12;
+            left-margin: 12;
+            right-margin: 12;
+
+            buffer: GtkSource.Buffer input_buffer {
+              highlight-syntax: true;
+            };
+
+            show-line-numbers: true;
+            auto-indent: true;
+            monospace: true;
+
+            styles [
+              "card",
+            ]
+          }
         }
       }
 
-      ScrolledWindow {
-        vexpand: true;
-        hexpand: true;
+      Box {
+        orientation: vertical;
+        spacing: 6;
 
-        GtkSource.View {
-          top-margin: 12;
-          bottom-margin: 12;
-          left-margin: 12;
-          right-margin: 12;
+        Box {
+          spacing: 6;
+          margin-start: 6;
+          margin-end: 6;
 
-          buffer: GtkSource.Buffer output_buffer {
-            highlight-syntax: true;
-          };
+          Label {
+            label: _("Output");
 
-          show-line-numbers: true;
-          monospace: true;
-          editable: false;
+            styles [
+              "heading",
+            ]
+          }
 
-          styles [
-            "card",
-          ]
+          Button {
+            icon-name: "edit-copy-symbolic";
+            tooltip-text: _("Copy");
+            halign: end;
+            hexpand: true;
+
+            styles [
+              "flat",
+            ]
+          }
+        }
+
+        ScrolledWindow {
+          vexpand: true;
+          hexpand: true;
+
+          GtkSource.View {
+            top-margin: 12;
+            bottom-margin: 12;
+            left-margin: 12;
+            right-margin: 12;
+
+            buffer: GtkSource.Buffer output_buffer {
+              highlight-syntax: true;
+            };
+
+            show-line-numbers: true;
+            monospace: true;
+            editable: false;
+
+            styles [
+              "card",
+            ]
+          }
         }
       }
     };
