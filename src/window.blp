@@ -1,0 +1,116 @@
+using Gtk 4.0;
+using Adw 1;
+using GtkSource 5;
+
+template $ExchangeWindow: Adw.ApplicationWindow {
+  title: _("Exchange");
+  default-width: 900;
+  default-height: 600;
+
+  content: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      title-widget: Adw.ToggleGroup {
+        Adw.Toggle {
+          label: _("XML -> Blueprint");
+        }
+
+        Adw.Toggle {
+          label: _("Blueprint -> XML");
+        }
+      };
+
+      [end]
+      MenuButton {
+        primary: true;
+        icon-name: "open-menu-symbolic";
+        tooltip-text: _("Main Menu");
+        menu-model: primary_menu;
+      }
+
+      [end]
+      Button convert_button {
+        label: _("Convert");
+
+        styles [
+          "suggested-action",
+        ]
+      }
+    }
+
+    content: Box {
+      margin-top: 12;
+      margin-bottom: 12;
+      margin-start: 12;
+      margin-end: 12;
+      spacing: 12;
+
+      ScrolledWindow {
+        vexpand: true;
+        hexpand: true;
+
+        GtkSource.View {
+          top-margin: 12;
+          bottom-margin: 12;
+          left-margin: 12;
+          right-margin: 12;
+
+          buffer: GtkSource.Buffer input_buffer {
+            highlight-syntax: true;
+          };
+
+          show-line-numbers: true;
+          auto-indent: true;
+          monospace: true;
+
+          styles [
+            "card",
+          ]
+        }
+      }
+
+      ScrolledWindow {
+        vexpand: true;
+        hexpand: true;
+
+        GtkSource.View {
+          top-margin: 12;
+          bottom-margin: 12;
+          left-margin: 12;
+          right-margin: 12;
+
+          buffer: GtkSource.Buffer output_buffer {
+            highlight-syntax: true;
+          };
+
+          show-line-numbers: true;
+          monospace: true;
+          editable: false;
+
+          styles [
+            "card",
+          ]
+        }
+      }
+    };
+  };
+}
+
+menu primary_menu {
+  section {
+    item {
+      label: _("_Preferences");
+      action: "app.preferences";
+    }
+
+    item {
+      label: _("_Keyboard Shortcuts");
+      action: "app.shortcuts";
+    }
+
+    item {
+      label: _("_About Exchange");
+      action: "app.about";
+    }
+  }
+}
