@@ -1,3 +1,4 @@
+import asyncio
 import subprocess
 import tempfile
 from pathlib import Path
@@ -33,6 +34,9 @@ class ExchangeWindow(Adw.ApplicationWindow):
         self.convert_button.connect("clicked", self.on_convert_clicked)
 
     def on_convert_clicked(self, _):
+        asyncio.create_task(self.convert_input_to_output())
+
+    async def convert_input_to_output(self):
         start, end = self.input_buffer.get_bounds()
         buffer_content = self.input_buffer.get_text(start, end, True)
 
@@ -44,9 +48,10 @@ class ExchangeWindow(Adw.ApplicationWindow):
             input_file = Path(tmpdir) / "input"
             output_file = Path(tmpdir) / "output"
 
-            input_file.write_text(buffer_content)
+            await asyncio.to_thread(input_file.write_text, buffer_content)
 
-            subprocess.run(
+            await asyncio.to_thread(
+                subprocess.run,
                 [
                     "blueprint-compiler",
                     "decompile",
@@ -54,11 +59,9 @@ class ExchangeWindow(Adw.ApplicationWindow):
                     "--output",
                     str(output_file),
                 ],
-                capture_output=True,
-                text=True,
                 check=True,
             )
 
-            ouput_text = output_file.read_text()
+            ouput_text = await asyncio.to_thread(output_file.read_text)
 
         self.output_buffer.set_text(ouput_text)

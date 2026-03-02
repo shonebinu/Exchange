@@ -1,3 +1,4 @@
+import asyncio
 import sys
 
 import gi
@@ -5,7 +6,8 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gio, Gtk
+from gi.events import GLibEventLoopPolicy
+from gi.repository import Adw, Gio
 
 from .window import ExchangeWindow
 
@@ -70,5 +72,6 @@ class ExchangeApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
     app = ExchangeApplication()
     return app.run(sys.argv)
