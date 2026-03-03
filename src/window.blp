@@ -10,13 +10,15 @@ template $ExchangeWindow: Adw.ApplicationWindow {
   content: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
-      title-widget: Adw.ToggleGroup {
+      title-widget: Adw.ToggleGroup direction_toggle_group {
         Adw.Toggle {
           label: _("XML → Blueprint");
+          name: "xml_to_blp";
         }
 
         Adw.Toggle {
           label: _("Blueprint → XML");
+          name: "blp_to_xml";
         }
       };
 
@@ -83,6 +85,8 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             bottom-margin: 12;
             left-margin: 12;
             right-margin: 12;
+            vexpand: true;
+            hexpand: true;
 
             buffer: GtkSource.Buffer input_buffer {
               highlight-syntax: true;
@@ -91,6 +95,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             show-line-numbers: true;
             auto-indent: true;
             monospace: true;
+            highlight-current-line: true;
 
             styles [
               "card",
