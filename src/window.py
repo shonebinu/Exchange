@@ -18,11 +18,14 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
     convert_button: Gtk.Button = Gtk.Template.Child()
     direction_toggle_group: Adw.ToggleGroup = Gtk.Template.Child()
+    input_source_view: GtkSource.View = Gtk.Template.Child()
     input_buffer: GtkSource.Buffer = Gtk.Template.Child()
     output_buffer: GtkSource.Buffer = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.input_source_view.grab_focus()
 
         self.clipboard = (
             display.get_clipboard() if (display := Gdk.Display.get_default()) else None
