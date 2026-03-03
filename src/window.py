@@ -27,12 +27,10 @@ class ExchangeWindow(Adw.ApplicationWindow):
             display.get_clipboard() if (display := Gdk.Display.get_default()) else None
         )
 
-        style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme(
-            "Adwaita-dark"
-        )
-        self.input_buffer.set_style_scheme(style_scheme)
-        self.output_buffer.set_style_scheme(style_scheme)
+        self.style_manager = Adw.StyleManager.get_default()
+        self.style_manager.connect("notify::dark", self.update_style_scheme)
 
+        self.update_style_scheme()
         self.update_languages()
 
         self.convert_button.connect("clicked", self.on_convert_clicked)
@@ -40,6 +38,15 @@ class ExchangeWindow(Adw.ApplicationWindow):
             "notify::active-name",
             self.on_direction_changed,
         )
+
+    def update_style_scheme(self, *_):
+        scheme_name = "Adwaita-dark" if self.style_manager.get_dark() else "Adwaita"
+
+        scheme = GtkSource.StyleSchemeManager.get_default().get_scheme(scheme_name)
+
+        if scheme:
+            self.input_buffer.set_style_scheme(scheme)
+            self.output_buffer.set_style_scheme(scheme)
 
     def update_languages(self):
         lang_manager = GtkSource.LanguageManager.get_default()
