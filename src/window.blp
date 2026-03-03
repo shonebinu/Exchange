@@ -69,6 +69,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             tooltip-text: _("Paste");
             halign: end;
             hexpand: true;
+            clicked => $on_paste_clicked();
 
             styles [
               "flat",
@@ -126,6 +127,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             tooltip-text: _("Copy");
             halign: end;
             hexpand: true;
+            clicked => $on_copy_clicked();
 
             styles [
               "flat",

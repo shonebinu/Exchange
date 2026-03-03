@@ -6,7 +6,7 @@ from pathlib import Path
 import gi
 
 gi.require_version("GtkSource", "5")
-from gi.repository import Adw, Gtk, GtkSource
+from gi.repository import Adw, Gdk, Gio, Gtk, GtkSource
 
 GtkSource.init()
 
@@ -22,6 +22,10 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.clipboard = (
+            display.get_clipboard() if (display := Gdk.Display.get_default()) else None
+        )
 
         style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme(
             "Adwaita-dark"
@@ -86,3 +90,28 @@ class ExchangeWindow(Adw.ApplicationWindow):
             ouput_text = await asyncio.to_thread(output_file.read_text)
 
         self.output_buffer.set_text(ouput_text)
+
+    def on_clipboard_read_finished(
+        self, clipboard: Gdk.Clipboard, result: Gio.AsyncResult
+    ):
+        if not (text := clipboard.read_text_finish(result)):
+            return
+
+        self.input_buffer.set_text(text)
+
+    @Gtk.Template.Callback()
+    def on_paste_clicked(self, _):
+        if not self.clipboard:
+            return
+
+        self.clipboard.read_text_async(callback=self.on_clipboard_read_finished)
+
+    @Gtk.Template.Callback()
+    def on_copy_clicked(self, _):
+        if not self.clipboard:
+            return
+
+        start, end = self.output_buffer.get_bounds()
+        buffer_content = self.output_buffer.get_text(start, end, True)
+
+        self.clipboard.set(buffer_content)
