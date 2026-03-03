@@ -1,4 +1,5 @@
 import asyncio
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -33,7 +34,6 @@ class ExchangeWindow(Adw.ApplicationWindow):
         self.update_style_scheme()
         self.update_languages()
 
-        self.convert_button.connect("clicked", self.on_convert_clicked)
         self.direction_toggle_group.connect(
             "notify::active-name",
             self.on_direction_changed,
@@ -62,9 +62,6 @@ class ExchangeWindow(Adw.ApplicationWindow):
     def on_direction_changed(self, *_):
         self.update_languages()
 
-    def on_convert_clicked(self, _):
-        asyncio.create_task(self.convert_input_to_output())
-
     async def convert_input_to_output(self):
         start, end = self.input_buffer.get_bounds()
         buffer_content = self.input_buffer.get_text(start, end, True)
@@ -72,6 +69,8 @@ class ExchangeWindow(Adw.ApplicationWindow):
         if not buffer_content.strip():
             print("Empty input.")
             return
+
+        self.convert_button.set_sensitive(False)
 
         active_toggle = self.direction_toggle_group.get_active_name()
         direction = "decompile" if active_toggle == "xml_to_blp" else "compile"
@@ -94,9 +93,31 @@ class ExchangeWindow(Adw.ApplicationWindow):
                 check=True,
             )
 
-            ouput_text = await asyncio.to_thread(output_file.read_text)
+            output_text = await asyncio.to_thread(output_file.read_text)
 
-        self.output_buffer.set_text(ouput_text)
+        self.output_buffer.set_text(
+            self.remove_xml_header(output_text)
+            if direction == "compile"
+            else output_text
+        )
+
+        self.convert_button.set_sensitive(True)
+
+    def remove_xml_header(self, xml_text: str) -> str:
+        pattern = r"<!--\s*DO NOT EDIT!.*?-->\n?"
+        cleaned_xml = re.sub(pattern, "", xml_text, flags=re.DOTALL)
+        return cleaned_xml
+
+    @Gtk.Template.Callback()
+    def on_convert_clicked(self, _):
+        asyncio.create_task(self.convert_input_to_output())
+
+    @Gtk.Template.Callback()
+    def on_paste_clicked(self, _):
+        if not self.clipboard:
+            return
+
+        self.clipboard.read_text_async(callback=self.on_clipboard_read_finished)
 
     def on_clipboard_read_finished(
         self, clipboard: Gdk.Clipboard, result: Gio.AsyncResult
@@ -105,13 +126,6 @@ class ExchangeWindow(Adw.ApplicationWindow):
             return
 
         self.input_buffer.set_text(text)
-
-    @Gtk.Template.Callback()
-    def on_paste_clicked(self, _):
-        if not self.clipboard:
-            return
-
-        self.clipboard.read_text_async(callback=self.on_clipboard_read_finished)
 
     @Gtk.Template.Callback()
     def on_copy_clicked(self, _):

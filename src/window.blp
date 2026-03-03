@@ -33,6 +33,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
       [end]
       Button convert_button {
         label: _("Convert");
+        clicked => $on_convert_clicked();
 
         styles [
           "suggested-action",
@@ -152,6 +153,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             show-line-numbers: true;
             monospace: true;
             editable: false;
+            cursor-visible: false;
 
             styles [
               "card",
@@ -165,11 +167,6 @@ template $ExchangeWindow: Adw.ApplicationWindow {
 
 menu primary_menu {
   section {
-    item {
-      label: _("_Preferences");
-      action: "app.preferences";
-    }
-
     item {
       label: _("_Keyboard Shortcuts");
       action: "app.shortcuts";
