@@ -1,7 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <gresources>
   <gresource prefix="/io/github/shonebinu/Exchange">
     <file preprocess="xml-stripblanks">window.ui</file>
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
-  </gresource>
+
+    <file preprocess="xml-stripblanks">icons/open-menu-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/document-open-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/edit-paste-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/edit-copy-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/document-save-symbolic.svg</file>
+ </gresource>
 </gresources>

@@ -65,43 +65,63 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             ]
           }
 
-          Button {
-            icon-name: "edit-paste-symbolic";
-            tooltip-text: _("Paste");
+          Box {
             halign: end;
             hexpand: true;
-            clicked => $on_paste_clicked();
+            spacing: 6;
 
-            styles [
-              "flat",
-            ]
+            Button {
+              Adw.ButtonContent {
+                label: _("Open");
+                icon-name: "document-open-symbolic";
+              }
+
+              clicked => $on_file_open_clicked();
+
+              styles [
+                "flat",
+              ]
+            }
+
+            Button {
+              icon-name: "edit-paste-symbolic";
+              tooltip-text: _("Paste");
+              clicked => $on_paste_clicked();
+
+              styles [
+                "flat",
+              ]
+            }
           }
         }
 
-        ScrolledWindow {
-          vexpand: true;
-          hexpand: true;
-
-          GtkSource.View input_source_view {
-            top-margin: 12;
-            bottom-margin: 12;
-            left-margin: 12;
-            right-margin: 12;
+        Box {
+          ScrolledWindow {
             vexpand: true;
             hexpand: true;
-
-            buffer: GtkSource.Buffer input_buffer {
-              highlight-syntax: true;
-            };
-
-            show-line-numbers: true;
-            auto-indent: true;
-            monospace: true;
-            highlight-current-line: true;
+            overflow: hidden;
 
             styles [
               "card",
             ]
+
+            GtkSource.View input_source_view {
+              top-margin: 12;
+              bottom-margin: 12;
+              left-margin: 12;
+              right-margin: 12;
+              vexpand: true;
+              hexpand: true;
+
+              buffer: GtkSource.Buffer input_buffer {
+                highlight-syntax: true;
+              };
+
+              show-line-numbers: true;
+              auto-indent: true;
+              monospace: true;
+              highlight-current-line: true;
+            }
           }
         }
       }
@@ -123,22 +143,46 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             ]
           }
 
-          Button {
-            icon-name: "edit-copy-symbolic";
-            tooltip-text: _("Copy");
+          Box {
             halign: end;
             hexpand: true;
-            clicked => $on_copy_clicked();
+            spacing: 6;
 
-            styles [
-              "flat",
-            ]
+            Button {
+              Adw.ButtonContent {
+                label: _("Save");
+                icon-name: "document-save-symbolic";
+              }
+
+              clicked => $on_file_save_clicked();
+
+              styles [
+                "flat",
+              ]
+            }
+
+            Button {
+              icon-name: "edit-copy-symbolic";
+              tooltip-text: _("Copy");
+              halign: end;
+              hexpand: true;
+              clicked => $on_copy_clicked();
+
+              styles [
+                "flat",
+              ]
+            }
           }
         }
 
         ScrolledWindow {
           vexpand: true;
           hexpand: true;
+          overflow: hidden;
+
+          styles [
+            "card",
+          ]
 
           GtkSource.View {
             top-margin: 12;
@@ -153,11 +197,6 @@ template $ExchangeWindow: Adw.ApplicationWindow {
             show-line-numbers: true;
             monospace: true;
             editable: false;
-            cursor-visible: false;
-
-            styles [
-              "card",
-            ]
           }
         }
       }
