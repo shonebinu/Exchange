@@ -1,5 +1,6 @@
 import asyncio
 import subprocess
+from typing import Optional
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk, GtkSource
 
@@ -118,6 +119,27 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
         self.write_buffer(self.input_buffer, text)
 
+        lang = self.guess_language_from_text(text)
+        toggle_map = {"xml": "xml_to_blp", "blp": "blp_to_xml"}
+
+        if lang in toggle_map:
+            self.direction_toggle_group.set_active_name(toggle_map[lang])
+
+    def guess_language_from_text(self, text: str) -> Optional[str]:
+        content_type, uncertain = Gio.content_type_guess(data=text.encode("utf-8"))
+        if uncertain:
+            content_type = None
+
+        manager = GtkSource.LanguageManager.get_default()
+        language = manager.guess_language(content_type=content_type)
+
+        if language and language.get_id() == "xml":
+            return "xml"
+
+        # .blp content doesn't seem to be recognised by content_type_guess()
+        if "using Gtk" in text or "using Adw" in text:
+            return "blp"
+
     @Gtk.Template.Callback()
     def on_copy_clicked(self, _):
         if not self.clipboard:
@@ -234,6 +256,3 @@ class ExchangeWindow(Adw.ApplicationWindow):
             toast_msg = f"Unable to save {display_name}"
 
         self.toast_overlay.add_toast(Adw.Toast(title=toast_msg))
-
-
-# todo: detect lang when pasting and opening file (xml, ui, blp)
