@@ -5,9 +5,10 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
+gi.require_version("GtkSource", "5")
 
 from gi.events import GLibEventLoopPolicy
-from gi.repository import Adw, Gio
+from gi.repository import Adw, Gio, GtkSource
 
 from .window import ExchangeWindow
 
@@ -21,6 +22,7 @@ class ExchangeApplication(Adw.Application):
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
             resource_base_path="/io/github/shonebinu/Exchange",
         )
+        GtkSource.init()
         self.create_action("quit", lambda *_: self.quit(), ["<control>q"])
         self.create_action("about", self.on_about_action)
 

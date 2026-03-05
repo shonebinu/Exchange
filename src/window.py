@@ -4,18 +4,14 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-import gi
-
-gi.require_version("GtkSource", "5")
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk, GtkSource
-
-GtkSource.init()
 
 
 @Gtk.Template(resource_path="/io/github/shonebinu/Exchange/window.ui")
 class ExchangeWindow(Adw.ApplicationWindow):
     __gtype_name__ = "ExchangeWindow"
 
+    toast_overlay: Adw.ToastOverlay = Gtk.Template.Child()
     convert_button: Gtk.Button = Gtk.Template.Child()
     direction_toggle_group: Adw.ToggleGroup = Gtk.Template.Child()
     input_source_view: GtkSource.View = Gtk.Template.Child()
@@ -64,12 +60,24 @@ class ExchangeWindow(Adw.ApplicationWindow):
     def on_direction_changed(self, *_):
         self.update_languages()
 
-    async def convert_input_to_output(self):
-        start, end = self.input_buffer.get_bounds()
-        buffer_content = self.input_buffer.get_text(start, end, True)
+    def read_buffer(self, buffer: GtkSource.Buffer) -> str:
+        start, end = buffer.get_bounds()
+        return buffer.get_text(start, end, True)
 
-        if not buffer_content.strip():
-            print("Empty input.")
+    def write_buffer(self, buffer: GtkSource.Buffer, text: str):
+        buffer.begin_user_action()
+
+        start_iter, end_iter = buffer.get_bounds()
+        buffer.delete(start_iter, end_iter)
+        buffer.insert(buffer.get_start_iter(), text)
+
+        buffer.end_user_action()
+
+    async def convert_input_to_output(self):
+        input_buffer_content = self.read_buffer(self.input_buffer)
+
+        if not input_buffer_content.strip():
+            self.toast_overlay.add_toast(Adw.Toast(title="Empty input buffer"))
             return
 
         self.convert_button.set_sensitive(False)
@@ -82,7 +90,7 @@ class ExchangeWindow(Adw.ApplicationWindow):
                 input_file = Path(tmpdir) / "input"
                 output_file = Path(tmpdir) / "output"
 
-                await asyncio.to_thread(input_file.write_text, buffer_content)
+                await asyncio.to_thread(input_file.write_text, input_buffer_content)
 
                 await asyncio.to_thread(
                     subprocess.run,
@@ -98,15 +106,20 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
                 output_text = await asyncio.to_thread(output_file.read_text)
 
-                self.output_buffer.set_text(
-                    self.remove_xml_header(output_text)
-                    if direction == "compile"
-                    else output_text
-                )
+            output_buffer_text = (
+                self.remove_xml_header(output_text)
+                if direction == "compile"
+                else output_text
+            )
 
-        except subprocess.CalledProcessError:
-            # TODO: Make a toast
-            print("Failed to")
+            self.write_buffer(self.output_buffer, output_buffer_text)
+
+        except Exception as err:
+            error_msg = "Conversion failed"
+            if not isinstance(err, subprocess.SubprocessError):
+                error_msg += f" : {err}"
+
+            self.toast_overlay.add_toast(Adw.Toast(title=error_msg))
         finally:
             self.convert_button.set_sensitive(True)
 
@@ -132,98 +145,124 @@ class ExchangeWindow(Adw.ApplicationWindow):
         if not (text := clipboard.read_text_finish(result)):
             return
 
-        self.input_buffer.set_text(text)
+        self.write_buffer(self.input_buffer, text)
 
     @Gtk.Template.Callback()
     def on_copy_clicked(self, _):
         if not self.clipboard:
             return
 
-        # TODO: make toast
-
-        start, end = self.output_buffer.get_bounds()
-        buffer_content = self.output_buffer.get_text(start, end, True)
+        if not (buffer_content := self.read_buffer(self.output_buffer)):
+            return
 
         self.clipboard.set(buffer_content)
+        self.toast_overlay.add_toast(Adw.Toast(title="Copied to clipboard"))
 
     @Gtk.Template.Callback()
     def on_file_open_clicked(self, _):
-        native = Gtk.FileDialog()
-        native.open(self, None, self.on_open_response)
 
-    def on_open_response(self, dialog, result):
-        file = dialog.open_finish(result)
-        # If the user selected a file
-        if file is not None:
-            self.open_file(file)
+        files_filter = Gtk.FileFilter(
+            name="UI Definition Files (.ui, .blp, .xml)",
+            suffixes=["ui", "blp", "xml"],
+            mime_types=[
+                "application/x-gtk-builder",
+                "text/x-blueprint",
+                "application/xml",
+                "text/xml",
+            ],
+        )
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        filters.append(files_filter)
 
-    def open_file(self, file):
-        file.load_contents_async(None, self.open_file_complete)
+        file_dialog = Gtk.FileDialog(filters=filters)
 
-    def open_file_complete(self, file, result):
-        contents = file.load_contents_finish(result)
+        file_dialog.open(self, None, self.on_open_response)
 
-        # TODO: change to async and make toast
-        if not contents[0]:
-            path = file.peek_path()
-            print(f"Unable to open {path}: {contents[1]}")
-            return
+    def on_open_response(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult):
+        # If user selected a file
+        if file := dialog.open_finish(result):
+            file.load_contents_async(None, self.open_file_complete)
 
+    def open_file_complete(self, file: Gio.File, result: Gio.AsyncResult):
         try:
-            text = contents[1].decode("utf-8")
-            self.input_buffer.set_text(text)
-        except UnicodeError:
-            path = file.peek_path()
-            print(
-                f"Unable to load the contents of {path}: the file is not encoded with UTF-8"
+            success, data, _ = file.load_contents_finish(result)
+
+            if not success:
+                raise Exception("File could not be read.")
+
+            path = file.get_path()
+            path_lower = path.lower() if path else ""
+            info = file.query_info(
+                "standard::content-type", Gio.FileQueryInfoFlags.NONE
             )
-            return
+            mime = info.get_content_type() or ""
+
+            is_xml = path_lower.endswith((".ui", ".xml")) or mime in (
+                "application/x-gtk-builder",
+                "text/xml",
+                "application/xml",
+            )
+            is_blp = path_lower.endswith(".blp") or mime == "text/x-blueprint"
+
+            if is_xml:
+                self.direction_toggle_group.set_active_name("xml_to_blp")
+            elif is_blp:
+                self.direction_toggle_group.set_active_name("blp_to_xml")
+
+            self.write_buffer(self.input_buffer, data.decode("utf-8"))
+        except Exception as err:
+            self.toast_overlay.add_toast(Adw.Toast(title=f"Failed to load file: {err}"))
 
     @Gtk.Template.Callback()
     def on_file_save_clicked(self, _):
-        # todo: if buffer empty avoid.
-        native = Gtk.FileDialog()
-        native.save(self, None, self.on_save_response)
-
-    def on_save_response(self, dialog, result):
-        file = dialog.save_finish(result)
-        if file is not None:
-            self.save_file(file)
-
-    def save_file(self, file):
-
-        # Retrieve the iterator at the start of the buffer
-        start = self.output_buffer.get_start_iter()
-        # Retrieve the iterator at the end of the buffer
-        end = self.output_buffer.get_end_iter()
-        # Retrieve all the visible text between the two bounds
-        text = self.output_buffer.get_text(start, end, False)
-
-        # If there is nothing to save, return early
-        if not text:
+        if not self.read_buffer(self.output_buffer).strip():
+            self.toast_overlay.add_toast(Adw.Toast(title="Empty output buffer"))
             return
 
-        bytes = GLib.Bytes.new(text.encode("utf-8"))
-
-        # Start the asynchronous operation to save the data into the file
-        file.replace_contents_bytes_async(
-            bytes, None, False, Gio.FileCreateFlags.NONE, None, self.save_file_complete
+        file_extension = (
+            "blp"
+            if self.direction_toggle_group.get_active_name() == "xml_to_blp"
+            else "ui"
         )
 
-    def save_file_complete(self, file, result):
-        res = file.replace_contents_finish(result)
+        file_dialog = Gtk.FileDialog(
+            title=f"Save {file_extension} file",
+            initial_name=f"untitled.{file_extension}",
+        )
+
+        file_dialog.save(self, None, self.on_save_response)
+
+    def on_save_response(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult):
+        text = self.read_buffer(self.output_buffer)
+
+        if file := dialog.save_finish(result):
+            bytes = GLib.Bytes.new(text.encode("utf-8"))
+
+            file.replace_contents_bytes_async(
+                contents=bytes,
+                etag=None,
+                make_backup=False,
+                flags=Gio.FileCreateFlags.NONE,
+                callback=self.save_file_complete,
+            )
+
+    def save_file_complete(self, file: Gio.File, result: Gio.AsyncResult):
+        success, _ = file.replace_contents_finish(result)
+
         info = file.query_info("standard::display-name", Gio.FileQueryInfoFlags.NONE)
-        if info:
-            display_name = info.get_attribute_string("standard::display-name")
+
+        display_name = (
+            info.get_attribute_string("standard::display-name")
+            if info
+            else file.get_basename()
+        )
+
+        if success:
+            toast_msg = f"Saved {display_name}"
         else:
-            display_name = file.get_basename()
-        if not res:
-            print(f"Unable to save {display_name}")
+            toast_msg = f"Unable to save {display_name}"
 
-        # Todo: make toast
+        self.toast_overlay.add_toast(Adw.Toast(title=toast_msg))
 
 
-# todo: change to async pattern
-# todo: open filetype annd save filetype
 # todo: detect lang when pasting and opening file (xml, ui, blp)
-# todo: set text shouldn't clear the save stack
