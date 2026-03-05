@@ -1,10 +1,9 @@
 import asyncio
-import re
 import subprocess
-import tempfile
-from pathlib import Path
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk, GtkSource
+
+from .compiler import BlueprintCompiler
 
 
 @Gtk.Template(resource_path="/io/github/shonebinu/Exchange/window.ui")
@@ -74,9 +73,9 @@ class ExchangeWindow(Adw.ApplicationWindow):
         buffer.end_user_action()
 
     async def convert_input_to_output(self):
-        input_buffer_content = self.read_buffer(self.input_buffer)
+        input_text = self.read_buffer(self.input_buffer)
 
-        if not input_buffer_content.strip():
+        if not input_text.strip():
             self.toast_overlay.add_toast(Adw.Toast(title="Empty input buffer"))
             return
 
@@ -86,33 +85,10 @@ class ExchangeWindow(Adw.ApplicationWindow):
         direction = "decompile" if active_toggle == "xml_to_blp" else "compile"
 
         try:
-            with await asyncio.to_thread(tempfile.TemporaryDirectory) as tmpdir:
-                input_file = Path(tmpdir) / "input"
-                output_file = Path(tmpdir) / "output"
-
-                await asyncio.to_thread(input_file.write_text, input_buffer_content)
-
-                await asyncio.to_thread(
-                    subprocess.run,
-                    [
-                        "blueprint-compiler",
-                        direction,
-                        str(input_file),
-                        "--output",
-                        str(output_file),
-                    ],
-                    check=True,
-                )
-
-                output_text = await asyncio.to_thread(output_file.read_text)
-
-            output_buffer_text = (
-                self.remove_xml_header(output_text)
-                if direction == "compile"
-                else output_text
+            output_text = await asyncio.to_thread(
+                BlueprintCompiler.process, input_text, direction
             )
-
-            self.write_buffer(self.output_buffer, output_buffer_text)
+            self.write_buffer(self.output_buffer, output_text)
 
         except Exception as err:
             error_msg = "Conversion failed"
@@ -122,11 +98,6 @@ class ExchangeWindow(Adw.ApplicationWindow):
             self.toast_overlay.add_toast(Adw.Toast(title=error_msg))
         finally:
             self.convert_button.set_sensitive(True)
-
-    def remove_xml_header(self, xml_text: str) -> str:
-        pattern = r"<!--\s*DO NOT EDIT!.*?-->\n?"
-        cleaned_xml = re.sub(pattern, "", xml_text, flags=re.DOTALL)
-        return cleaned_xml
 
     @Gtk.Template.Callback()
     def on_convert_clicked(self, _):

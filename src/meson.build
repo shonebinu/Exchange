@@ -40,6 +40,7 @@ exchange_sources = [
   '__init__.py',
   'main.py',
   'window.py',
+  'compiler.py',
 ]
 
 install_data(exchange_sources, install_dir: moduledir)
