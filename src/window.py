@@ -105,24 +105,27 @@ class ExchangeWindow(Adw.ApplicationWindow):
         asyncio.create_task(self.convert_input_to_output())
 
     @Gtk.Template.Callback()
-    def on_paste_clicked(self, _):
+    def on_paste_button_clicked(self, _):
         if not self.clipboard:
             return
 
-        self.clipboard.read_text_async(callback=self.on_clipboard_read_finished)
+        self.clipboard.read_text_async(None, self.on_clipboard_read_finished, True)
 
     def on_clipboard_read_finished(
-        self, clipboard: Gdk.Clipboard, result: Gio.AsyncResult
+        self,
+        clipboard: Gdk.Clipboard,
+        result: Gio.AsyncResult,
+        manual_buffer_write: bool = False,
     ):
         if not (text := clipboard.read_text_finish(result)):
             return
 
         self.write_buffer(self.input_buffer, text)
 
-        self.set_active_toggle_by_content_guess(text)
+        self.guess_content_and_set_toggle(text)
 
     @Gtk.Template.Callback()
-    def on_textview_clipboard_paste(self, _):
+    def on_input_textview_paste(self, _):
         # switch btwn blp_to_xml and xml_to_blp by detecting the pasted content only if the buffer is empty
         # if buffer not empty, user might be making modifications
 
@@ -130,18 +133,11 @@ class ExchangeWindow(Adw.ApplicationWindow):
         if self.read_buffer(self.input_buffer).strip():
             return
 
+        # dont write to buffer manually. only set toggle by guessing
         if self.clipboard:
-            self.clipboard.read_text_async()
+            self.clipboard.read_text_async(None, self.on_clipboard_read_finished, False)
 
-    def guess_lang_from_clipboard(
-        self, clipboard: Gdk.Clipboard, result: Gio.AsyncResult
-    ):
-        if not (text := clipboard.read_text_finish(result)):
-            return
-
-        self.set_active_toggle_by_content_guess(text)
-
-    def set_active_toggle_by_content_guess(self, text: str) -> Optional[str]:
+    def guess_content_and_set_toggle(self, text: str) -> Optional[str]:
         content_type, uncertain = Gio.content_type_guess(data=text.encode("utf-8"))
         if uncertain:
             content_type = None
@@ -162,7 +158,7 @@ class ExchangeWindow(Adw.ApplicationWindow):
             self.direction_toggle_group.set_active_name(toggle_map[lang])
 
     @Gtk.Template.Callback()
-    def on_copy_clicked(self, _):
+    def on_copy_button_clicked(self, _):
         if not self.clipboard:
             return
 

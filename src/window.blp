@@ -87,7 +87,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
               Button {
                 icon-name: "edit-paste-symbolic";
                 tooltip-text: _("Paste");
-                clicked => $on_paste_clicked();
+                clicked => $on_paste_button_clicked();
 
                 styles [
                   "flat",
@@ -122,7 +122,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
                 auto-indent: true;
                 monospace: true;
                 highlight-current-line: true;
-                paste-clipboard => $on_textview_clipboard_paste();
+                paste-clipboard => $on_input_textview_paste();
               }
             }
           }
@@ -168,7 +168,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
                 tooltip-text: _("Copy");
                 halign: end;
                 hexpand: true;
-                clicked => $on_copy_clicked();
+                clicked => $on_copy_button_clicked();
 
                 styles [
                   "flat",
