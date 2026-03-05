@@ -122,6 +122,7 @@ template $ExchangeWindow: Adw.ApplicationWindow {
                 auto-indent: true;
                 monospace: true;
                 highlight-current-line: true;
+                paste-clipboard => $on_textview_clipboard_paste();
               }
             }
           }

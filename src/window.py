@@ -119,13 +119,29 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
         self.write_buffer(self.input_buffer, text)
 
-        lang = self.guess_language_from_text(text)
-        toggle_map = {"xml": "xml_to_blp", "blp": "blp_to_xml"}
+        self.set_active_toggle_by_content_guess(text)
 
-        if lang in toggle_map:
-            self.direction_toggle_group.set_active_name(toggle_map[lang])
+    @Gtk.Template.Callback()
+    def on_textview_clipboard_paste(self, _):
+        # switch btwn blp_to_xml and xml_to_blp by detecting the pasted content only if the buffer is empty
+        # if buffer not empty, user might be making modifications
 
-    def guess_language_from_text(self, text: str) -> Optional[str]:
+        # current text
+        if self.read_buffer(self.input_buffer).strip():
+            return
+
+        if self.clipboard:
+            self.clipboard.read_text_async()
+
+    def guess_lang_from_clipboard(
+        self, clipboard: Gdk.Clipboard, result: Gio.AsyncResult
+    ):
+        if not (text := clipboard.read_text_finish(result)):
+            return
+
+        self.set_active_toggle_by_content_guess(text)
+
+    def set_active_toggle_by_content_guess(self, text: str) -> Optional[str]:
         content_type, uncertain = Gio.content_type_guess(data=text.encode("utf-8"))
         if uncertain:
             content_type = None
@@ -133,12 +149,17 @@ class ExchangeWindow(Adw.ApplicationWindow):
         manager = GtkSource.LanguageManager.get_default()
         language = manager.guess_language(content_type=content_type)
 
+        lang = None
         if language and language.get_id() == "xml":
-            return "xml"
-
+            lang = "xml"
         # .blp content doesn't seem to be recognised by content_type_guess()
-        if "using Gtk" in text or "using Adw" in text:
-            return "blp"
+        elif "using Gtk" in text or "using Adw" in text:
+            lang = "blp"
+
+        toggle_map = {"xml": "xml_to_blp", "blp": "blp_to_xml"}
+
+        if lang in toggle_map:
+            self.direction_toggle_group.set_active_name(toggle_map[lang])
 
     @Gtk.Template.Callback()
     def on_copy_clicked(self, _):
