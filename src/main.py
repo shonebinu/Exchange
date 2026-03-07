@@ -39,16 +39,12 @@ class ExchangeApplication(Adw.Application):
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
-        about = Adw.AboutDialog(
-            application_name="exchange",
-            application_icon="io.github.shonebinu.Exchange",
-            developer_name="Shone Binu",
-            version="0.1.0",
-            developers=["Shone Binu"],
-            copyright="© 2026 Shone Binu",
+        about = Adw.AboutDialog.new_from_appdata(
+            "/io/github/shonebinu/Exchange/appdata.xml"
         )
-        # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
-        about.set_translator_credits(_("translator-credits"))
+        about.add_link("Donate with Ko-Fi", "https://ko-fi.com/shonebinu")
+        about.add_link("Sponsor on Github", "https://github.com/sponsors/shonebinu")
+
         about.present(self.props.active_window)
 
     def create_action(self, name, callback, shortcuts=None):

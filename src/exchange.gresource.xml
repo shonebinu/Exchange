@@ -9,5 +9,10 @@
     <file preprocess="xml-stripblanks">icons/edit-paste-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/edit-copy-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/document-save-symbolic.svg</file>
+
+    <file
+            preprocess="xml-stripblanks"
+            alias="appdata.xml"
+        >../data/io.github.shonebinu.Exchange.metainfo.xml</file>
  </gresource>
 </gresources>
