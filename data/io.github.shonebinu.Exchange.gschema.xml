@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <schemalist gettext-domain="exchange">
 	<schema id="io.github.shonebinu.Exchange" path="/io/github/shonebinu/Exchange/">
 	</schema>
