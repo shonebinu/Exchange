@@ -13,6 +13,7 @@
         <ul>
             <li>Convert XML to Blueprint</li>
             <li>Convert Blueprint to XML</li>
+            <li>Automatically detects format when pasting or opening files</li>
         </ul>
   </description>
 
