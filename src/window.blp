@@ -7,38 +7,24 @@ template $ExchangeWindow: Adw.ApplicationWindow {
   default-width: 900;
   default-height: 600;
 
+  Adw.Breakpoint {
+    condition ("max-width: 600sp")
+
+    setters {
+      sourceview_container_box.orientation: vertical;
+    }
+  }
+
   content: Adw.ToastOverlay toast_overlay {
     Adw.ToolbarView {
       [top]
       Adw.HeaderBar {
-        title-widget: Adw.ToggleGroup direction_toggle_group {
-          Adw.Toggle {
-            label: _("XML → Blueprint");
-            name: "xml_to_blp";
-          }
-
-          Adw.Toggle {
-            label: _("Blueprint → XML");
-            name: "blp_to_xml";
-          }
-        };
-
         [end]
         MenuButton {
           primary: true;
           icon-name: "open-menu-symbolic";
           tooltip-text: _("Main Menu");
           menu-model: primary_menu;
-        }
-
-        [end]
-        Button convert_button {
-          label: _("Convert");
-          clicked => $on_convert_clicked();
-
-          styles [
-            "suggested-action",
-          ]
         }
       }
 
@@ -47,56 +33,164 @@ template $ExchangeWindow: Adw.ApplicationWindow {
         margin-bottom: 12;
         margin-start: 12;
         margin-end: 12;
-        spacing: 12;
+        orientation: vertical;
 
-        Box {
-          orientation: vertical;
-          spacing: 6;
-
-          Box {
-            spacing: 6;
-            margin-start: 6;
-            margin-end: 6;
-
-            Label {
-              label: _("Input");
-
-              styles [
-                "heading",
-              ]
+        Adw.Clamp {
+          Adw.ToggleGroup direction_toggle_group {
+            Adw.Toggle {
+              label: _("XML → Blueprint");
+              name: "xml_to_blp";
             }
 
+            Adw.Toggle {
+              label: _("Blueprint → XML");
+              name: "blp_to_xml";
+            }
+          }
+        }
+
+        Box sourceview_container_box {
+          margin-top: 24;
+          spacing: 12;
+          homogeneous: true;
+
+          Box {
+            orientation: vertical;
+            spacing: 6;
+
             Box {
-              halign: end;
-              hexpand: true;
               spacing: 6;
+              margin-start: 6;
+              margin-end: 6;
 
-              Button {
-                Adw.ButtonContent {
-                  label: _("Open");
-                  icon-name: "document-open-symbolic";
-                }
-
-                clicked => $on_file_open_clicked();
+              Label {
+                label: _("Input");
 
                 styles [
-                  "flat",
+                  "heading",
                 ]
               }
 
-              Button {
-                icon-name: "edit-paste-symbolic";
-                tooltip-text: _("Paste");
-                clicked => $on_paste_button_clicked();
+              Box {
+                halign: end;
+                hexpand: true;
+                spacing: 6;
+
+                Button {
+                  Adw.ButtonContent {
+                    label: _("Open");
+                    icon-name: "document-open-symbolic";
+                  }
+
+                  clicked => $on_file_open_clicked();
+
+                  styles [
+                    "flat",
+                  ]
+                }
+
+                Button {
+                  icon-name: "edit-paste-symbolic";
+                  tooltip-text: _("Paste");
+                  clicked => $on_paste_button_clicked();
+
+                  styles [
+                    "flat",
+                  ]
+                }
+
+                Button convert_button {
+                  label: _("Convert");
+                  clicked => $on_convert_clicked();
+
+                  styles [
+                    "suggested-action",
+                  ]
+                }
+              }
+            }
+
+            Box {
+              ScrolledWindow {
+                vexpand: true;
+                hexpand: true;
+                overflow: hidden;
 
                 styles [
-                  "flat",
+                  "card",
                 ]
+
+                GtkSource.View input_source_view {
+                  top-margin: 12;
+                  bottom-margin: 12;
+                  left-margin: 12;
+                  right-margin: 12;
+                  vexpand: true;
+                  hexpand: true;
+
+                  buffer: GtkSource.Buffer input_buffer {
+                    highlight-syntax: true;
+                  };
+
+                  show-line-numbers: true;
+                  auto-indent: true;
+                  monospace: true;
+                  highlight-current-line: true;
+                  paste-clipboard => $on_input_textview_paste();
+                }
               }
             }
           }
 
           Box {
+            orientation: vertical;
+            spacing: 6;
+
+            Box {
+              spacing: 6;
+              margin-start: 6;
+              margin-end: 6;
+
+              Label {
+                label: _("Output");
+
+                styles [
+                  "heading",
+                ]
+              }
+
+              Box {
+                halign: end;
+                hexpand: true;
+                spacing: 6;
+
+                Button {
+                  Adw.ButtonContent {
+                    label: _("Save");
+                    icon-name: "document-save-symbolic";
+                  }
+
+                  clicked => $on_file_save_clicked();
+
+                  styles [
+                    "flat",
+                  ]
+                }
+
+                Button {
+                  icon-name: "edit-copy-symbolic";
+                  tooltip-text: _("Copy");
+                  halign: end;
+                  hexpand: true;
+                  clicked => $on_copy_button_clicked();
+
+                  styles [
+                    "flat",
+                  ]
+                }
+              }
+            }
+
             ScrolledWindow {
               vexpand: true;
               hexpand: true;
@@ -106,99 +200,20 @@ template $ExchangeWindow: Adw.ApplicationWindow {
                 "card",
               ]
 
-              GtkSource.View input_source_view {
+              GtkSource.View {
                 top-margin: 12;
                 bottom-margin: 12;
                 left-margin: 12;
                 right-margin: 12;
-                vexpand: true;
-                hexpand: true;
 
-                buffer: GtkSource.Buffer input_buffer {
+                buffer: GtkSource.Buffer output_buffer {
                   highlight-syntax: true;
                 };
 
                 show-line-numbers: true;
-                auto-indent: true;
                 monospace: true;
-                highlight-current-line: true;
-                paste-clipboard => $on_input_textview_paste();
+                editable: false;
               }
-            }
-          }
-        }
-
-        Box {
-          orientation: vertical;
-          spacing: 6;
-
-          Box {
-            spacing: 6;
-            margin-start: 6;
-            margin-end: 6;
-
-            Label {
-              label: _("Output");
-
-              styles [
-                "heading",
-              ]
-            }
-
-            Box {
-              halign: end;
-              hexpand: true;
-              spacing: 6;
-
-              Button {
-                Adw.ButtonContent {
-                  label: _("Save");
-                  icon-name: "document-save-symbolic";
-                }
-
-                clicked => $on_file_save_clicked();
-
-                styles [
-                  "flat",
-                ]
-              }
-
-              Button {
-                icon-name: "edit-copy-symbolic";
-                tooltip-text: _("Copy");
-                halign: end;
-                hexpand: true;
-                clicked => $on_copy_button_clicked();
-
-                styles [
-                  "flat",
-                ]
-              }
-            }
-          }
-
-          ScrolledWindow {
-            vexpand: true;
-            hexpand: true;
-            overflow: hidden;
-
-            styles [
-              "card",
-            ]
-
-            GtkSource.View {
-              top-margin: 12;
-              bottom-margin: 12;
-              left-margin: 12;
-              right-margin: 12;
-
-              buffer: GtkSource.Buffer output_buffer {
-                highlight-syntax: true;
-              };
-
-              show-line-numbers: true;
-              monospace: true;
-              editable: false;
             }
           }
         }
