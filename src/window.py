@@ -120,7 +120,8 @@ class ExchangeWindow(Adw.ApplicationWindow):
         if not (text := clipboard.read_text_finish(result)):
             return
 
-        self.write_buffer(self.input_buffer, text)
+        if manual_buffer_write:
+            self.write_buffer(self.input_buffer, text)
 
         self.guess_content_and_set_toggle(text)
 
