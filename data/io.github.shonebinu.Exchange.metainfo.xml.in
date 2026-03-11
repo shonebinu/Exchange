@@ -79,7 +79,15 @@
   </screenshots>
 
   <releases>
-    <release version="1.0.1" date="2026-03-08">
+    <release version="0.1.1" date="2026-03-08">
+        <description translate="no">
+        <p>Release v0.1.0</p>
+        <ul>
+            <li>Initial release of the app</li>
+        </ul>
+        </description>
+    </release>
+    <release version="0.1.0" date="2026-03-08">
       <!-- <url type="details">https://example.org/changelog.html#version_1.0.1</url> -->
       <description translate="no">
         <p>Release v0.1.0</p>
