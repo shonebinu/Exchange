@@ -61,8 +61,8 @@
 
   <!-- Applications should set a brand color in both light and dark variants like so -->
   <branding>
-    <color type="primary" scheme_preference="light">#c8dfc3</color>
-    <color type="primary" scheme_preference="dark">#3d3846</color>
+    <color type="primary" scheme_preference="light">#a1c7f5</color>
+    <color type="primary" scheme_preference="dark">#1a508b</color>
   </branding>
 
   <screenshots>
@@ -79,11 +79,12 @@
   </screenshots>
 
   <releases>
-    <release version="0.1.1" date="2026-03-08">
+    <release version="0.1.1" date="2026-03-11">
         <description translate="no">
-        <p>Release v0.1.0</p>
+        <p>Release v0.1.1</p>
         <ul>
-            <li>Initial release of the app</li>
+            <li>Fix clipboard double pasting</li>
+            <li>New logo and accent colors</li>
         </ul>
         </description>
     </release>
