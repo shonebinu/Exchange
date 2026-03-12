@@ -3,6 +3,7 @@
   <gresource prefix="/io/github/shonebinu/Exchange">
     <file preprocess="xml-stripblanks">window.ui</file>
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
+    <file preprocess="xml-stripblanks">logs-dialog.ui</file>
 
     <file preprocess="xml-stripblanks">icons/open-menu-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/document-open-symbolic.svg</file>

@@ -6,6 +6,7 @@ blueprints = custom_target('blueprints',
   input: files(
     'shortcuts-dialog.blp',
     'window.blp',
+    'logs-dialog.blp',
   ),
   output: '.',
   command: [find_program('blueprint-compiler'), 'batch-compile', '@OUTPUT@', '@CURRENT_SOURCE_DIR@', '@INPUT@'],
@@ -41,6 +42,7 @@ exchange_sources = [
   'main.py',
   'window.py',
   'compiler.py',
+  'logs_dialog.py',
 ]
 
 install_data(exchange_sources, install_dir: moduledir)

@@ -1,10 +1,12 @@
 import asyncio
+import re
 import subprocess
 from typing import Optional
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk, GtkSource
 
 from .compiler import BlueprintCompiler
+from .logs_dialog import LogsDialog
 
 
 @Gtk.Template(resource_path="/io/github/shonebinu/Exchange/window.ui")
@@ -31,6 +33,8 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
         self.update_style_scheme()
         self.update_languages()
+
+        self.logs_dialog: LogsDialog = LogsDialog()
 
         self.direction_toggle_group.connect(
             "notify::active-name",
@@ -92,11 +96,30 @@ class ExchangeWindow(Adw.ApplicationWindow):
             self.write_buffer(self.output_buffer, output_text)
 
         except Exception as err:
+            toast = Adw.Toast()
             error_msg = "Conversion failed"
-            if not isinstance(err, subprocess.SubprocessError):
-                error_msg += f" : {err}"
 
-            self.toast_overlay.add_toast(Adw.Toast(title=error_msg))
+            if isinstance(err, subprocess.SubprocessError):
+                # escape colors and such which will look gibberish
+                ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+                process_logs = ansi_escape.sub("", err.stderr)  # type: ignore
+
+                if process_logs:
+                    toast.set_button_label("View Logs")
+
+                    toast.connect(
+                        "button-clicked",
+                        lambda *_: (
+                            self.logs_dialog.set_logs(str(process_logs)),
+                            self.logs_dialog.present(self.get_root()),  # type: ignore
+                        ),
+                    )
+            else:
+                error_msg += f": {err}"
+
+            toast.set_title(error_msg)
+
+            self.toast_overlay.add_toast(toast)
         finally:
             self.convert_button.set_sensitive(True)
 

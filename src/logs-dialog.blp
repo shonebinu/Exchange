@@ -1,0 +1,27 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $LogsDialog: Adw.Dialog {
+  can-close: true;
+  content-width: 400;
+  content-height: 500;
+  title: "Process Logs";
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    ScrolledWindow {
+      Label logs_label {
+        margin-top: 12;
+        margin-bottom: 12;
+        margin-start: 12;
+        margin-end: 12;
+        valign: start;
+        halign: start;
+        selectable: true;
+        wrap: true;
+      }
+    }
+  }
+}
