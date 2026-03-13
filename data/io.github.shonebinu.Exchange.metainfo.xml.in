@@ -73,12 +73,25 @@
     </screenshot>
     <screenshot>
       <image
+            >https://raw.githubusercontent.com/shonebinu/Exchange/refs/heads/main/data/screenshots/exchange-error-logs.png</image>
+      <caption>Error logs dialog</caption>
+    </screenshot>
+    <screenshot>
+      <image
             >https://raw.githubusercontent.com/shonebinu/Exchange/refs/heads/main/data/screenshots/exchange-small.png</image>
       <caption>Small screen size</caption>
     </screenshot>
   </screenshots>
 
   <releases>
+    <release version="0.2.0" date="2026-03-13">
+        <description translate="no">
+        <p>Release v0.2.0</p>
+        <ul>
+            <li>Add dialog for displaying errors</li>
+        </ul>
+        </description>
+    </release>
     <release version="0.1.1" date="2026-03-11">
         <description translate="no">
         <p>Release v0.1.1</p>
