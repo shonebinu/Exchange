@@ -5,10 +5,10 @@ from gi.repository import Adw, Gtk
 class LogsDialog(Adw.Dialog):
     __gtype_name__ = "LogsDialog"
 
-    logs_label: Gtk.Label = Gtk.Template.Child()
+    text_buffer: Gtk.TextBuffer = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def set_logs(self, text: str):
-        self.logs_label.set_markup(f"<tt>{text}</tt>")
+        self.text_buffer.set_text(text)

@@ -12,15 +12,17 @@ template $LogsDialog: Adw.Dialog {
     Adw.HeaderBar {}
 
     ScrolledWindow {
-      Label logs_label {
-        margin-top: 12;
-        margin-bottom: 12;
-        margin-start: 12;
-        margin-end: 12;
-        valign: start;
-        halign: start;
-        selectable: true;
-        wrap: true;
+      TextView {
+        editable: false;
+        cursor-visible: false;
+        wrap-mode: word_char;
+        monospace: true;
+        left-margin: 12;
+        right-margin: 12;
+        top-margin: 12;
+        bottom-margin: 12;
+
+        buffer: Gtk.TextBuffer text_buffer {};
       }
     }
   }
