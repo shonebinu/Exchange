@@ -5,15 +5,27 @@
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
     <file preprocess="xml-stripblanks">logs-dialog.ui</file>
 
-    <file preprocess="xml-stripblanks">icons/open-menu-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/document-open-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/edit-paste-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/edit-copy-symbolic.svg</file>
-    <file preprocess="xml-stripblanks">icons/document-save-symbolic.svg</file>
-
     <file
             preprocess="xml-stripblanks"
             alias="appdata.xml"
         >../data/io.github.shonebinu.Exchange.metainfo.xml</file>
+ </gresource>
+
+ <gresource prefix="/io/github/shonebinu/Exchange/icons/scalable/actions">
+    <file
+            preprocess="xml-stripblanks"
+        >../data/icons/scalable/actions/open-menu-symbolic.svg</file>
+    <file
+            preprocess="xml-stripblanks"
+        >../data/icons/scalable/actions/document-open-symbolic.svg</file>
+    <file
+            preprocess="xml-stripblanks"
+        >../data/icons/scalable/actions/edit-paste-symbolic.svg</file>
+    <file
+            preprocess="xml-stripblanks"
+        >../data/icons/scalable/actions/edit-copy-symbolic.svg</file>
+    <file
+            preprocess="xml-stripblanks"
+        >../data/icons/scalable/actions/document-save-symbolic.svg</file>
  </gresource>
 </gresources>
