@@ -45,6 +45,13 @@ class ExchangeApplication(Adw.Application):
         about.add_link("Donate with Ko-Fi", "https://ko-fi.com/shonebinu")
         about.add_link("Sponsor on Github", "https://github.com/sponsors/shonebinu")
 
+        about.add_other_app(
+            "io.github.shonebinu.Glyph", "Lipi", "Discover and install online fonts"
+        )
+        about.add_other_app(
+            "io.github.shonebinu.Brief", "Brief", "Browse command-line cheatsheets"
+        )
+
         about.present(self.props.active_window)
 
     def create_action(self, name, callback, shortcuts=None):

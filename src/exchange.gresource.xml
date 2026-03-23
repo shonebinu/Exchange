@@ -28,4 +28,13 @@
             preprocess="xml-stripblanks"
         >../data/icons/scalable/actions/document-save-symbolic.svg</file>
  </gresource>
+
+ <gresource prefix="/io/github/shonebinu/Exchange/icons/scalable/apps">
+   <file
+            alias="io.github.shonebinu.Brief.svg"
+        >../data/icons/scalable/apps/io.github.shonebinu.Brief.svg</file>
+   <file
+            alias="io.github.shonebinu.Glyph.svg"
+        >../data/icons/scalable/apps/io.github.shonebinu.Glyph.svg</file>
+ </gresource>
 </gresources>
