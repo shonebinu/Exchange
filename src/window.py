@@ -22,10 +22,21 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         self.input_source_view.grab_focus()
 
         self.clipboard = (
             display.get_clipboard() if (display := Gdk.Display.get_default()) else None
+        )
+        self.open_files_filter = Gtk.FileFilter(
+            name="UI Definition Files (.ui, .blp, .xml)",
+            suffixes=["ui", "blp", "xml"],
+            mime_types=[
+                "application/x-gtk-builder",
+                "text/x-blueprint",
+                "application/xml",
+                "text/xml",
+            ],
         )
 
         self.style_manager = Adw.StyleManager.get_default()
@@ -194,21 +205,7 @@ class ExchangeWindow(Adw.ApplicationWindow):
 
     @Gtk.Template.Callback()
     def on_file_open_clicked(self, _):
-
-        files_filter = Gtk.FileFilter(
-            name="UI Definition Files (.ui, .blp, .xml)",
-            suffixes=["ui", "blp", "xml"],
-            mime_types=[
-                "application/x-gtk-builder",
-                "text/x-blueprint",
-                "application/xml",
-                "text/xml",
-            ],
-        )
-        filters = Gio.ListStore.new(Gtk.FileFilter)
-        filters.append(files_filter)
-
-        file_dialog = Gtk.FileDialog(filters=filters)
+        file_dialog = Gtk.FileDialog(default_filter=self.open_files_filter)
 
         file_dialog.open(self, None, self.on_open_response)
 
