@@ -33,3 +33,9 @@ Exchange lets you convert between GTK UI definition formats such as XML and Blue
 ## Development
 
 You can clone this project and run it using [Gnome Builder](https://apps.gnome.org/Builder/).
+
+## Other apps by me
+
+- [**Brief**](https://github.com/shonebinu/Brief) - Browse command-line cheatsheets
+- [**Lipi**](https://github.com/shonebinu/Lipi) - Discover and install online fonts
+- [**Defuse**](https://github.com/shonebinu/Defuse) - Remove image backgrounds locally
