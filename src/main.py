@@ -52,6 +52,8 @@ class ExchangeApplication(Adw.Application):
             "io.github.shonebinu.Brief", "Brief", "Browse command-line cheatsheets"
         )
 
+        about.set_artists(["bda-git"])
+
         about.present(self.props.active_window)
 
     def create_action(self, name, callback, shortcuts=None):
